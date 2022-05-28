@@ -1,13 +1,15 @@
-using System;
+//using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Spine.Unity;
 using Spine;
-using Spine.Unity.Modules.AttachmentTools;
+using TMPro;
 
 public class Character : MonoBehaviour
 {
+    [SerializeField] private TMP_Text damageText;
+
     [SerializeField] private MeshRenderer meshRenderer;
 
     [SerializeField] private GameObject highlighter;
@@ -20,8 +22,8 @@ public class Character : MonoBehaviour
 
     public Character Target { get; private set; }
 
-    [SerializeField] private SkeletonAnimation skeletonAnimation;
-    protected SkeletonAnimation SkeletonAnimation { get => skeletonAnimation; private set => skeletonAnimation = value; }
+    [SerializeField] private SkeletonAnimation characterSkeletonAnimn;
+    protected SkeletonAnimation CharacterSkeletonAnim { get => characterSkeletonAnimn; private set => characterSkeletonAnimn = value; }
 
 
     protected Skin IdleSkin { get; set; }
@@ -34,7 +36,7 @@ public class Character : MonoBehaviour
     {
         IsDone = false;
         Target = target;
-        TrackEntry entry = SkeletonAnimation.AnimationState.SetAnimation(0, AttackAnim, false);
+        TrackEntry entry = CharacterSkeletonAnim.AnimationState.SetAnimation(0, AttackAnim, false);
         entry.Complete += Idle;
         entry.Event += Hit;
     }
@@ -50,14 +52,19 @@ public class Character : MonoBehaviour
 
     private void Idle(TrackEntry trackEntry)
     {
-        SkeletonAnimation.AnimationState.SetAnimation(0, "Idle", true);
+        CharacterSkeletonAnim.AnimationState.SetAnimation(0, "Idle", true);
+        damageText.gameObject.SetActive(false);
         IsDone = true;
     }
 
     public virtual void Damaged(int damage)
     {
         IsDone = false;
-        TrackEntry entry = SkeletonAnimation.AnimationState.SetAnimation(0, "Damage", false);
+        damageText.text = (-damage).ToString();
+        damageText.transform.localPosition = new Vector2(Random.Range(-2f, 2f), Random.Range(-2f, 2f));
+        damageText.gameObject.SetActive(true);
+
+        TrackEntry entry = CharacterSkeletonAnim.AnimationState.SetAnimation(0, "Damage", false);
         entry.Complete += Idle;
         Health -= damage;
         if (Health <= 0)

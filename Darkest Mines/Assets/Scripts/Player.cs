@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using Spine.Unity.Modules.AttachmentTools;
 
 public class Player : Character
 {
@@ -57,9 +56,9 @@ public class Player : Character
     private void Evolve()
     {
         Debug.Log(gameObject.name + " evolves!!!");
-        SkeletonData skeletonData = SkeletonAnimation.Skeleton.Data;
+        SkeletonData skeletonData = CharacterSkeletonAnim.Skeleton.Data;
         IdleSkin = skeletonData.FindSkin("elite");
-        SkeletonAnimation.Skeleton.SetSkin(IdleSkin);
+        CharacterSkeletonAnim.Skeleton.SetSkin(IdleSkin);
 
         AttackAnim = "DoubleShift";
         Health += Random.Range(20, 30);

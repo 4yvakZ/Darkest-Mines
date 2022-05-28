@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-
 public class Enemy : Character
 {
     [SerializeField] private TMP_Text hpText;
-
 
     // Start is called before the first frame update
     void Start()
     {
         Health = Random.Range(20, 40);
-        MinDamage = 5;
-        MaxDamage = 10;
+        MinDamage = 8;
+        MaxDamage = 12;
         hpText.text = "Enemy " + Health + " HP";
     }
 

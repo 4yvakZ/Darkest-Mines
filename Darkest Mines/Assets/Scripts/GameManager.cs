@@ -18,11 +18,13 @@ public class GameManager : MonoBehaviour
     public bool IsFightingAnim { get; private set; }
 
     [SerializeField]private GameObject fade;
+    private bool isGameOver;
 
 
     // Update is called once per frame
     void Update()
     {
+        if (isGameOver) return;
         if (IsBattleActive)
         {
             if (IsFightingAnim)
@@ -32,6 +34,17 @@ public class GameManager : MonoBehaviour
                 {
                     characters[index].MoveToBack();
                     target.MoveToBack();
+                    if (!target.isActiveAndEnabled && target is Player)
+                    {
+                        players.Remove(target as Player);
+                        if (players.Count == 0)
+                        {
+                            text.text = "Game Over";
+                            text.gameObject.SetActive(true);
+                            isGameOver = true;
+                            return;
+                        }
+                    }
                     fade.SetActive(false);
                     CheckCharacters();
                     IsFightingAnim = false;

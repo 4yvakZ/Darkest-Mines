@@ -1,14 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Enemy : Character
 {
-    
+    [SerializeField] private TMP_Text hpText;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         Highlighter = transform.GetChild(1).gameObject;
+        Health = Random.Range(20, 40);
+        MinDamage = 5;
+        MaxDamage = 10;
+        hpText.text = "Enemy " + Health + " HP";
     }
 
     // Update is called once per frame
@@ -27,13 +32,14 @@ public class Enemy : Character
         Highlighter.SetActive(false);
     }
 
-    public override void Attack()
+    public override void Damaged(int damage)
     {
-        throw new System.NotImplementedException();
-    }
-
-    public override void Damaged()
-    {
-        throw new System.NotImplementedException();
+        base.Damaged(damage);
+        if (!isActiveAndEnabled)
+        {
+            Health = Random.Range(20, 40);
+            Highlighter.SetActive(false);
+        }
+        hpText.text = "Enemy " + Health + " HP";
     }
 }

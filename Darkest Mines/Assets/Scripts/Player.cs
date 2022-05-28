@@ -1,41 +1,57 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Player : Character
 {
-    private Character target;
-    private bool isAttacking = false;
+    [SerializeField] private TMP_Text hpText;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         Highlighter = transform.GetChild(1).gameObject;
+        Health = Random.Range(20, 50);
+        MinDamage = 10;
+        MaxDamage = 15;
+        hpText.text = "Miner " + Health + " HP";
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (isAttacking && Input.GetMouseButtonDown(0))
+        /*if (isAttacking && Input.GetMouseButtonDown(0))
         {       
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-            if (hit)
+            if (hit.collider.gameObject.CompareTag("Enemy"))
             {
+                Enemy target = hit.collider.gameObject.GetComponent<Enemy>();
+                target.Damaged(UnityEngine.Random.Range(MinDamage, MaxDamage));
                 Debug.Log(hit.transform.name);
                 Debug.Log("hit");
             }
-        }
+        }*/
     }
 
-    public override void Attack()
+    public override void Attack(Character target)
     {
-        isAttacking = true;
+        base.Attack(target);
+        Highlighter.SetActive(false);
+    }
+
+    public override void Damaged(int damage)
+    {
+        base.Damaged(damage);
+        hpText.text = "Miner " + Health + " HP";
+    }
+
+    public override void Hightlight()
+    {
         Highlighter.SetActive(true);
     }
 
-    public override void Damaged()
+    public void Skip()
     {
-        throw new NotImplementedException();
+        Highlighter.SetActive(false);
     }
 }

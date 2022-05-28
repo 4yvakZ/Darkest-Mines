@@ -15,41 +15,61 @@ public class GameManager : MonoBehaviour
     private int index = 0;
     public bool IsBattleActive { private set; get; }
     public bool IsAttacking { get; private set; }
+    public bool IsFightingAnim { get; private set; }
 
-    // Start is called before the first frame update
-    void Start()
-    {
+    [SerializeField]private GameObject fade;
 
-    }
 
     // Update is called once per frame
     void Update()
     {
         if (IsBattleActive)
         {
-            if (characters[index] is Enemy)
+            if (IsFightingAnim)
             {
-                Character target = players[Random.Range(0, players.Count)];
-                characters[index].Attack(target);
-                CheckCharacters();
-            }
-            else if (characters[index] is Player && IsAttacking && Input.GetMouseButtonDown(0))
-            {
-                RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-                if (hit && hit.collider.gameObject.CompareTag("Enemy"))
+                Character target = characters[index].Target;
+                if (characters[index].IsDone && (!target.isActiveAndEnabled || target.IsDone))
                 {
-                    Character target = hit.collider.gameObject.GetComponent<Enemy>();
-                    characters[index].Attack(target);
+                    characters[index].MoveToBack();
+                    target.MoveToBack();
+                    fade.SetActive(false);
                     CheckCharacters();
-                    IsAttacking = false;
+                    IsFightingAnim = false;
+                }
+            }
+            else
+            {
+                if (characters[index] is Enemy)
+                {
+                    Character target = players[Random.Range(0, players.Count)];
+                    StartFight(target);
+                }
+                else if (characters[index] is Player && IsAttacking && Input.GetMouseButtonDown(0))
+                {
+                    RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+                    if (hit && hit.collider.gameObject.CompareTag("Enemy"))
+                    {
+                        Character target = hit.collider.gameObject.GetComponent<Enemy>();
+                        StartFight(target);
+                        IsAttacking = false;
+                    }
                 }
             }
         }
     }
 
+    private void StartFight(Character target)
+    {
+        characters[index].Attack(target);
+        characters[index].MoveToForeground();
+        target.MoveToForeground();
+        fade.SetActive(true);
+        IsFightingAnim = true;
+    }
+
     private void CheckCharacters()
     {
-        
+        characters[index].Dehighlight();
         //ѕровер€емостались ли активные враги
         foreach (Character c in characters)
         {
@@ -59,7 +79,7 @@ public class GameManager : MonoBehaviour
                 for (index++; index < characters.Count && !characters[index].isActiveAndEnabled; index++);
                 if (index < characters.Count)
                 {
-                    characters[index].Hightlight();
+                    characters[index].Highlight();
                     return;
                 }
                 // онец очереди, убираем лишних и замешиваем
@@ -76,9 +96,11 @@ public class GameManager : MonoBehaviour
                 }
                 IListExtensions.Shuffle(characters);
                 index = 0;
+                characters[index].Highlight();
                 return;
             }
         }
+        text.gameObject.SetActive(true);
         IsBattleActive = false;
     }
 
@@ -87,13 +109,13 @@ public class GameManager : MonoBehaviour
         if (IsBattleActive) return;
         IsBattleActive = true;
 
-        text.text = "";
+        text.gameObject.SetActive(false);
         SpawnEnemies();
 
         characters.AddRange(players);
         characters.AddRange(enemies);
         IListExtensions.Shuffle(characters);
-        characters[index].Hightlight();
+        characters[index].Highlight();
     }
     private void SpawnEnemies()
     {
@@ -105,14 +127,15 @@ public class GameManager : MonoBehaviour
 
     public void PlayerAttack()
     {
+        if (!IsBattleActive) return;
         if (!(characters[index] is Player)) return;
         IsAttacking = true;
     }
 
     public void PlayerSkip()
     {
+        if (!IsBattleActive) return;
         if (!(characters[index] is Player)) return;
-        (characters[index]as Player).Skip();
         CheckCharacters();
     }
 }

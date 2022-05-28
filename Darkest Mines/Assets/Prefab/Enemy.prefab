@@ -210,6 +210,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d240c31868c2f94783c0a27e5860881, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  meshRenderer: {fileID: 8069456623485968289}
+  highlighter: {fileID: 8188002141340480843}
+  skeletonAnimation: {fileID: 8069456623485968302}
   hpText: {fileID: 656314552903570362}
 --- !u!50 &894415582
 Rigidbody2D:
@@ -219,7 +222,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6964305277186869389}
-  m_BodyType: 1
+  m_BodyType: 2
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0

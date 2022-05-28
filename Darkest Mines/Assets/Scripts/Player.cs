@@ -1,57 +1,70 @@
+using Spine;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using Spine.Unity.Modules.AttachmentTools;
 
 public class Player : Character
 {
     [SerializeField] private TMP_Text hpText;
 
+    private int kills = 0;
+
     // Start is called before the first frame update
-    void Awake()
+    void Start()
     {
-        Highlighter = transform.GetChild(1).gameObject;
+
         Health = Random.Range(20, 50);
         MinDamage = 10;
         MaxDamage = 15;
         hpText.text = "Miner " + Health + " HP";
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        /*if (isAttacking && Input.GetMouseButtonDown(0))
-        {       
-            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-            if (hit.collider.gameObject.CompareTag("Enemy"))
-            {
-                Enemy target = hit.collider.gameObject.GetComponent<Enemy>();
-                target.Damaged(UnityEngine.Random.Range(MinDamage, MaxDamage));
-                Debug.Log(hit.transform.name);
-                Debug.Log("hit");
-            }
-        }*/
-    }
-
     public override void Attack(Character target)
     {
         base.Attack(target);
-        Highlighter.SetActive(false);
+        if (!target.isActiveAndEnabled)
+        {
+            kills++;
+            if (kills == 1)
+            {
+                Evolve();
+            }
+        }
+    }
+
+    protected override void Hit(TrackEntry trackEntry, Spine.Event e)
+    {
+        base.Hit(trackEntry, e);
+        if (!Target.isActiveAndEnabled)
+        {
+            kills++;
+            if (kills == 1)
+            {
+                Evolve();
+            }
+        }
     }
 
     public override void Damaged(int damage)
     {
         base.Damaged(damage);
+
         hpText.text = "Miner " + Health + " HP";
     }
 
-    public override void Hightlight()
+    private void Evolve()
     {
-        Highlighter.SetActive(true);
-    }
+        Debug.Log(gameObject.name + " evolves!!!");
+        SkeletonData skeletonData = SkeletonAnimation.Skeleton.Data;
+        IdleSkin = skeletonData.FindSkin("elite");
+        SkeletonAnimation.Skeleton.SetSkin(IdleSkin);
 
-    public void Skip()
-    {
-        Highlighter.SetActive(false);
+        AttackAnim = "DoubleShift";
+        Health += Random.Range(20, 30);
+        MinDamage = 10;
+        MaxDamage = 20;
+        hpText.text = "Miner " + Health + " HP";
     }
 }

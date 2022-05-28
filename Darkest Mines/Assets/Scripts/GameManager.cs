@@ -101,6 +101,7 @@ public class GameManager : MonoBehaviour
             }
         }
         text.gameObject.SetActive(true);
+        characters.Clear();
         IsBattleActive = false;
     }
 

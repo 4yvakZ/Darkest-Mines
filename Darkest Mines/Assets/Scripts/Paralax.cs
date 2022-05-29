@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Класс для эффекта паралакса и движения заднего фона
+/// </summary>
 public class Paralax : MonoBehaviour
 {
     private float length;

@@ -10,7 +10,6 @@ public class Enemy : Character
     // Start is called before the first frame update
     void Start()
     {
-        Health = Random.Range(20, 40);
         MinDamage = 8;
         MaxDamage = 12;
         hpText.text = "Enemy " + Health + " HP";
@@ -40,5 +39,12 @@ public class Enemy : Character
     public override void Attack(Character target)
     {
         base.Attack(target);
+    }
+
+    public void Activate()
+    {
+        Health = Random.Range(20, 40);
+        hpText.text = "Enemy " + Health + " HP";
+        gameObject.SetActive(true);
     }
 }

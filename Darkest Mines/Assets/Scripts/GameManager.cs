@@ -1,4 +1,3 @@
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,14 +9,18 @@ public class GameManager : MonoBehaviour
 {
     [SerializeField] private List<Player> players = new List<Player>();
     [SerializeField] private List<Enemy> enemies = new List<Enemy>();
-    [SerializeField] private TMP_Text text;
     List<Character> characters = new List<Character>();
-    private int index = 0;
+
+    [SerializeField] private GameObject fade;
+    [SerializeField] private TMP_Text text;
+    [SerializeField] private TMP_Text roundText;
+    public int RoundIndex { get; private set; }
+
+    private int characterIndex = 0;
     public bool IsBattleActive { private set; get; }
     public bool IsAttacking { get; private set; }
     public bool IsFightingAnim { get; private set; }
 
-    [SerializeField]private GameObject fade;
     private bool isGameOver;
 
 
@@ -29,10 +32,10 @@ public class GameManager : MonoBehaviour
         {
             if (IsFightingAnim)
             {
-                Character target = characters[index].Target;
-                if (characters[index].IsDone && (!target.isActiveAndEnabled || target.IsDone))
+                Character target = characters[characterIndex].Target;
+                if (characters[characterIndex].IsDone && (!target.isActiveAndEnabled || target.IsDone))
                 {
-                    characters[index].MoveToBack();
+                    characters[characterIndex].MoveToBack();
                     target.MoveToBack();
                     if (!target.isActiveAndEnabled && target is Player)
                     {
@@ -52,12 +55,12 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                if (characters[index] is Enemy)
+                if (characters[characterIndex] is Enemy)
                 {
                     Character target = players[Random.Range(0, players.Count)];
                     StartFight(target);
                 }
-                else if (characters[index] is Player && IsAttacking && Input.GetMouseButtonDown(0))
+                else if (characters[characterIndex] is Player && IsAttacking && Input.GetMouseButtonDown(0))
                 {
                     RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
                     if (hit && hit.collider.gameObject.CompareTag("Enemy"))
@@ -71,10 +74,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Функция начала атаки персонажа
+    /// Запускает анимации и выводит на передний план
+    /// </summary>
+    /// <param name="target">Цель атаки персанажа</param>
     private void StartFight(Character target)
     {
-        characters[index].Attack(target);
-        characters[index].MoveToForeground();
+        characters[characterIndex].Attack(target);
+        characters[characterIndex].MoveToForeground();
         target.MoveToForeground();
         fade.SetActive(true);
         IsFightingAnim = true;
@@ -82,17 +90,17 @@ public class GameManager : MonoBehaviour
 
     private void CheckCharacters()
     {
-        characters[index].Dehighlight();
+        characters[characterIndex].Dehighlight();
         //Проверяемостались ли активные враги
         foreach (Character c in characters)
         {
             if (c is Enemy && c.isActiveAndEnabled)
             {
                 //Ищем следующего персонажа на ход
-                for (index++; index < characters.Count && !characters[index].isActiveAndEnabled; index++);
-                if (index < characters.Count)
+                for (characterIndex++; characterIndex < characters.Count && !characters[characterIndex].isActiveAndEnabled; characterIndex++);
+                if (characterIndex < characters.Count)
                 {
-                    characters[index].Highlight();
+                    characters[characterIndex].Highlight();
                     return;
                 }
                 //Конец очереди, убираем лишних и замешиваем
@@ -108,13 +116,16 @@ public class GameManager : MonoBehaviour
                     }
                 }
                 IListExtensions.Shuffle(characters);
-                index = 0;
-                characters[index].Highlight();
+                characterIndex = 0;
+                characters[characterIndex].Highlight();
+                RoundIndex++;
+                roundText.text = "Round " + RoundIndex;
                 return;
             }
         }
         text.gameObject.SetActive(true);
         characters.Clear();
+        roundText.gameObject.SetActive(false);
         IsBattleActive = false;
     }
 
@@ -122,6 +133,9 @@ public class GameManager : MonoBehaviour
     {
         if (IsBattleActive) return;
         IsBattleActive = true;
+        RoundIndex = 1;
+        roundText.text = "Round " + RoundIndex;
+        roundText.gameObject.SetActive(true);
 
         text.gameObject.SetActive(false);
         SpawnEnemies();
@@ -129,27 +143,37 @@ public class GameManager : MonoBehaviour
         characters.AddRange(players);
         characters.AddRange(enemies);
         IListExtensions.Shuffle(characters);
-        characters[index].Highlight();
+        characters[characterIndex].Highlight();
     }
+
+
     private void SpawnEnemies()
     {
         foreach (var enemy in enemies)
         {
-            enemy.gameObject.SetActive(true);
+            enemy.Activate();
         }
     }
 
+    /// <summary>
+    /// Функция активации режима атаки игроком
+    /// Вызывается кнопкой Attack
+    /// </summary>
     public void PlayerAttack()
     {
         if (!IsBattleActive) return;
-        if (!(characters[index] is Player)) return;
+        if (!(characters[characterIndex] is Player)) return;
         IsAttacking = true;
     }
 
+    /// <summary>
+    /// Функция пропуска хода
+    /// Вызывается кнопкой Skip
+    /// </summary>
     public void PlayerSkip()
     {
         if (!IsBattleActive) return;
-        if (!(characters[index] is Player)) return;
+        if (!(characters[characterIndex] is Player)) return;
         CheckCharacters();
     }
 }
@@ -157,7 +181,7 @@ public class GameManager : MonoBehaviour
 public static class IListExtensions
 {
     /// <summary>
-    /// Shuffles the element order of the specified list.
+    /// Перемешивает элементы списка
     /// </summary>
     public static void Shuffle<T>(this IList<T> ts)
     {

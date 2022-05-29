@@ -36,7 +36,7 @@ public class Player : Character
     protected override void Hit(TrackEntry trackEntry, Spine.Event e)
     {
         base.Hit(trackEntry, e);
-        if (!Target.isActiveAndEnabled)
+        if (Target.Health <= 0)
         {
             kills++;
             if (kills == 1)
@@ -53,6 +53,10 @@ public class Player : Character
         hpText.text = "Miner " + Health + " HP";
     }
 
+    /// <summary>
+    /// Повышает персонажа до элитного при убистве врага.
+    /// Меняет скин, лечит и меняет анимацию и силу атаки.
+    /// </summary>
     private void Evolve()
     {
         Debug.Log(gameObject.name + " evolves!!!");
